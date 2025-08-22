@@ -1,3 +1,6 @@
+Download the .exe file from the Releases. 
+
+
 ### ffmpeg.exe : 
 
 
@@ -16,9 +19,8 @@ ffmpeg-2025-08-20-git-...\
      ├─ ffplay.exe
      └─ ffprobe.exe
 
-
 The file you need is `bin/ffmpeg.exe`.
-Just copy that `ffmpeg.exe` into the same folder as your Python script / app `.exe`.
+Just copy that `ffmpeg.exe` into the same folder as the Python script `MusicdlGUI.py`.
 
 
 command for .exe build : 

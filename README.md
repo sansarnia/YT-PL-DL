@@ -19,3 +19,7 @@ ffmpeg-2025-08-20-git-...\
 
 The file you need is `bin/ffmpeg.exe`.
 Just copy that `ffmpeg.exe` into the same folder as your Python script / app `.exe`.
+
+
+command for .exe build : 
+$ pyinstaller MusicdlGUI.spec

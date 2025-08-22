@@ -3,6 +3,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, font, scrolledtext
 import subprocess
 import threading
+import sys, os
+import yt_dlp
+
 
 # 🔹 Make app DPI aware on Windows
 try:
@@ -22,38 +25,57 @@ def download_playlist():
 
     def run_download():
         try:
-            command = [
-                "yt-dlp",
-                "--ffmpeg-location", "ffmpeg.exe",
-                "-x", "--audio-format", "mp3",
-                "-o", f"{path}/%(title)s.%(ext)s",
-                url
-            ]
+            ffmpeg_path = resource_path("ffmpeg.exe")
 
-            # Start process
-            with subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-                universal_newlines=True
-            ) as process:
+            class TkLogger:
+                def debug(self, msg):
+                    if msg.startswith("[debug]"):
+                        return
+                    output_box.insert(tk.END, msg + "\n")
+                    output_box.see(tk.END)
+                def info(self, msg):
+                    output_box.insert(tk.END, msg + "\n")
+                    output_box.see(tk.END)
+                def warning(self, msg):
+                    output_box.insert(tk.END, "WARNING: " + msg + "\n")
+                    output_box.see(tk.END)
+                def error(self, msg):
+                    output_box.insert(tk.END, "ERROR: " + msg + "\n")
+                    output_box.see(tk.END)
 
-                # Stream output line by line
-                for line in process.stdout:
-                    output_box.insert(tk.END, line)
-                    output_box.see(tk.END)  # auto-scroll
+            def progress_hook(d):
+                if d.get('status') == 'downloading':
+                    line = d.get('_default_template', '') or d.get('filename', '')
+                    if 'speed' in d and 'eta' in d and 'downloaded_bytes' in d and 'total_bytes_estimate' in d:
+                        output_box.insert(tk.END, f"Downloading: {d['filename']} {d.get('speed', '')} ETA {d.get('eta', '')}\n")
+                    else:
+                        output_box.insert(tk.END, f"Downloading: {line}\n")
+                    output_box.see(tk.END)
+                elif d.get('status') == 'finished':
+                    output_box.insert(tk.END, "Download finished, now post-processing...\n")
+                    output_box.see(tk.END)
 
-                process.wait()
+            ydl_opts = {
+                'outtmpl': os.path.join(path, '%(title)s.%(ext)s'),
+                'format': 'bestaudio/best',
+                'noplaylist': False,
+                'logger': TkLogger(),
+                'progress_hooks': [progress_hook],
+                'ffmpeg_location': ffmpeg_path,
+                'postprocessors': [
+                    {
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192',
+                    }
+                ],
+            }
 
-                if process.returncode == 0:
-                    messagebox.showinfo("Done", "Download finished!")
-                else:
-                    messagebox.showerror("Error", f"yt-dlp exited with code {process.returncode}")
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
 
-        except FileNotFoundError:
-            messagebox.showerror("Error", "yt-dlp not found. Did you install it with pip?")
+            messagebox.showinfo("Done", "Download finished!")
+
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -82,10 +104,12 @@ def normalize_audio():
             messagebox.showerror("Error", "No MP3 files found in the selected folder.")
             return
 
+        ffmpeg_exec = resource_path("ffmpeg.exe")
+
         for file in mp3_files:
             normalized_file = file.replace(".mp3", "_normalized.mp3")
             command = [
-                "ffmpeg",
+                ffmpeg_exec,
                 "-y",  # overwrite
                 "-i", file,
                 "-af", "loudnorm",
@@ -114,11 +138,17 @@ def normalize_audio():
     threading.Thread(target=run_normalization, daemon=True).start()
 
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 # ---------------- GUI ----------------
 root = tk.Tk()
 root.title("YouTube Playlist to MP3 Downloader")
 root.geometry("700x500")
+icon_path = resource_path("toilet_window_icon_pink.ico")
+root.iconbitmap(icon_path)
 
 # 🔹 Scale UI (fonts + dialogs)
 root.tk.call('tk', 'scaling', 1.5)

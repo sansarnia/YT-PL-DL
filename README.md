@@ -1,5 +1,12 @@
-you can download the `MusicdlGUI.zip` from the Releases, unzip it and the run the .exe file inside.
-*Note that the playlist you want to download must be public.
+## Download and Run
+
+1. Go to the `Releases` page.  
+2. Download the file `MusicdlGUI.zip`.  
+3. Unzip the archive.  
+4. Launch the `MusicdlGUI.exe`.  
+
+**Note:** Your Youtube playlist must be **public**. Private playlists will not work.
+
 
 ### Note to self
 for the ffmpeg.exe : 

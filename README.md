@@ -1,5 +1,7 @@
 ## Download and Run
 
+<img src=".\PixelArt\Toilet_pixelArt_pink.png" alt="Alt text" width="70"/>
+
 1. Go to the `Releases` page.  
 2. Download the file `MusicdlGUI.zip`.  
 3. Unzip the archive.  

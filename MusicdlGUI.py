@@ -7,7 +7,7 @@ import sys, os
 import yt_dlp
 
 
-# 🔹 Make app DPI aware on Windows
+# Make app DPI aware on Windows
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)  # or 2 for per-monitor DPI
 except Exception:
@@ -150,7 +150,7 @@ root.geometry("700x500")
 icon_path = resource_path("toilet_window_icon_pink.ico")
 root.iconbitmap(icon_path)
 
-# 🔹 Scale UI (fonts + dialogs)
+# Scale UI (fonts + dialogs)
 root.tk.call('tk', 'scaling', 1.5)
 
 # Set bigger default font
